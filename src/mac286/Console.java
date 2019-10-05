@@ -76,6 +76,7 @@ public class Console {
 				System.out.println("Of course!, here you go:");			 	
 			readInput();
 			}
+		in.close();
 		
 	}//./readInput();
 	//Search for number on user input
