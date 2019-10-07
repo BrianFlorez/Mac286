@@ -1,5 +1,6 @@
 package mac286;
 import java.io.*;
+import java.util.*;
 import java.util.Scanner;
 public class Console {			
 	public static void main(String[] args) {		
@@ -62,6 +63,7 @@ public class Console {
 			break;
 			
 			
+			
 		}while(!str.isEmpty());		
 		System.out.println("The program has been terminated.");		
 	}//./readInput();
@@ -88,27 +90,39 @@ public class Console {
 	public static void search(String str) {
 		System.out.print("I see what you're tryin to do..");
 	}
-	public static void search(double n, String str, int keyword, boolean p, boolean s ) {		
+	public static void search(double n, String str, int keyword, boolean p, boolean s ) {
+		//Some cases may have execute the same function. The reason is because some cases are coming from Spanish language.
 		switch(keyword) {
-		//open price
+		//Open price
 		case 0: filterInRelationToOpenPrice(n,p,s); break;
 		case 8: filterInRelationToOpenPrice(n,p,s); break;
-		//today's high
+		//Today's high
 		case 2:	filterInRelationToTodaysHigh(n,p,s); break;
 		case 10: filterInRelationToTodaysHigh(n,p,s); break;
-			default: System.out.println("Sorry, I couldn't get that.");
-		}//./switch()
+		//Today's low
+		case 3: filterInRelationToTodaysLow(n,p,s); break;
+		case 11: filterInRelationToTodaysLow(n,p,s); break;
+		//52-Week high
+		case 4: filterInRelationTo52wkHigh(n,p,s); break;
+		case 5: filterInRelationTo52wkHigh(n,p,s); break;
+		case 12: filterInRelationTo52wkHigh(n,p,s); break;
+		case 13: filterInRelationTo52wkHigh(n,p,s); break;
+		//52-Week low
 		
+			default: System.out.println("Sorry, I couldn't get that.");
+		}//./switch()		
 	}
 	//Functions to compare current price to any other column
 	public static void filterInRelationToOpenPrice(double n,boolean p,boolean s) {
+		displayHeader(2);
 		//n = number in comparison, p = isPercent, s = isNegative
 		if(p) {
 			//search for percent negative
 			if(s) {					
 				for(int i = 0; i<Data.c;i++) {					
-					if( Data.columnD[i]<(Data.columnC[i]-Data.columnC[i]*(n/100))) {
-						System.out.println(Data.columnA[i]);
+					if( Data.columnD[i]<(Data.columnC[i]-Data.columnC[i]*(n/100))) {						
+						displayReport(i,2);
+						
 					}
 				}
 			}else {
@@ -142,13 +156,70 @@ public class Console {
 		else {System.out.println("That's imposible to answer. Check your input and try again, plaese \n");readInput();}}//./else			
 	
 	}
-	public static void filterInRelationToTodaysLow() {
+	public static void filterInRelationToTodaysLow(double n, boolean p, boolean s) {
+		//n = number in comparison, p = isPercent, s = isNegative
+		if(p) {//search for percent 		
+			for(int i = 0; i<Data.c-1;i++) 						
+					if(Data.columnD[i]>=(Data.columnF[i]+Data.columnF[i]*(n/100))) 
+						System.out.println(Data.columnA[i]);							
+		}else //search for constant			
+			for(int j= 0; j<Data.c;j++) 	
+					if(Data.columnD[j]-Data.columnF[j]>=n) 
+						System.out.println(Data.columnA[j]);			
+	}
+	public static void filterInRelationTo52wkHigh(double n, boolean p, boolean s) {
+		//TO BE CODED
+		if(p) {//search for percent negative
+			if(s) {
+				System.out.println("Search for percent negative in relation to 52wk high");
+				for(int i = 0; i<Data.c-1;i++)				
+					if( Data.columnD[i]>=(Data.columnG[i]-Data.columnG[i]*(n/100))) 
+						System.out.println(Data.columnA[i]);			
+			} else System.out.println("Wait, that makes no sense. Check your input and try again please.");			
+		}else//search for constant							
+			 for(int i= 0; i<Data.c;i++) 	
+					if(Data.columnD[i]-Data.columnG[i]< -n) 
+						System.out.println(Data.columnA[i]);	
+	}
+	public static void filterInrelationTo52wkLow(double n, boolean p, boolean s) {
 		
 	}
-	public static void filterInRelationTo52wkHigh() {
+	public static void displayReport(int i,int c) {
+		//Details for given company at index [i]
+		StringBuilder sb = new StringBuilder();		
+		sb.append(StringUtil.pad(Data.columnA[i], 20));
+		sb.append(StringUtil.pad(Data.columnB[i].toLowerCase(), 9));
+		sb.append(StringUtil.pad("$"+Data.columnD[i], 15));
+		switch(c) {
+		//Open price
+		case 2: sb.append(StringUtil.pad("$"+Data.columnC[i], 12)); break;
+		case 4: sb.append(StringUtil.pad("$"+Data.columnE[i], 15)); break;
+		case 5:	sb.append(StringUtil.pad("$"+Data.columnF[i], 15)); break;
+		case 6: sb.append(StringUtil.pad("$"+Data.columnG[i], 15)); break;
+		case 7: sb.append(StringUtil.pad("$"+Data.columnH[i], 15)); break;
+		default: System.out.println("Error printing display report");
+		}		
+		sb.append("\n");
+		System.out.print(sb);
+		
 		
 	}
-	public static void filterInrelationTo52wkLow() {
-		
+	public static void displayHeader(int c) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(StringUtil.pad("Company ", 20));
+		sb.append(StringUtil.pad("Ticker ", 9));
+		sb.append(StringUtil.pad("Current price ", 15));
+		switch(c){
+		case 2:sb.append(StringUtil.pad("Open price ", 12)); break;
+		case 4: sb.append(StringUtil.pad("Today's high ",15)); break;
+		case 5:	sb.append(StringUtil.pad("Today's low", 15)); break;
+		case 6: sb.append(StringUtil.pad("52-week high", 15)); break;
+		case 7: sb.append(StringUtil.pad("52-week low", 15)); break;
+		default : System.out.println("Error printing header");
+		}		
+		sb.append("\n");
+		System.out.println(sb);
 	}
+
+
 }

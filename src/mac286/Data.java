@@ -14,7 +14,7 @@ public class Data {
 	public static double[] columnF = new double[c];
 	public static double[] columnG = new double[c];
 	public static double[] columnH = new double[c];
-	//Array keywords helpful "In relation to what? cases" DO NOT ADD ELEMENTS WITHOUT MODIFYING CASES IN SEARCH()
+	//Array keywords helpful "In relation to what? cases" DO NOT ADD ELEMENTS IN BETWEEN, ALWAYS INSERT AT THE END
 	public static String[] keywords = {"open price","current price","today's high","today's low","52-week high", "52-wk high","52-week low","52-wk low","precio inicial","precio actual","alto de hoy","bajo de hoy","alto anual","maximo del ano","bajo anual","minimo del ano"};
 	//Does the user needs anything else? The elements must be lower case.
 	public static String[] positiveUserResponse = {};
