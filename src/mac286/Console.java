@@ -46,7 +46,7 @@ public class Console {
 				isNegative=true;	
 			//Search for keywords to find "relation to which column?"
 			int i;
-			for(i = 0; i<str.length()-1;i++) {			
+			for(i = 0; i<Data.keywords.length;i++) {			
 					if(str.contains("%"))
 						isPercent = true;				
 					if((str.contains(Data.keywords[i]))) break;
@@ -56,7 +56,7 @@ public class Console {
 			search(extractNumber(str),str,i,isPercent,isNegative);
 			else search(str);
 			System.out.println();
-			System.out.println("What else do you need to know from the data? Remember, I also understand some Spanish. ");	
+			Data.getFriendlyIntroduction(); //Does the user needs anything else?
 			str = kb.nextLine();			
 			//Terminate the program if the user's input is empty or Data.negativeUserResponse[str.contains(all elements)];
 			if(!(Data.doesUserNeedsAnythingElse(str)))
@@ -64,7 +64,7 @@ public class Console {
 			
 			
 			
-		}while(!str.isEmpty());		
+		}while(!str.isEmpty() || (str !=""));			
 		System.out.println("The program has been terminated.");		
 	}//./readInput();
 	//Search for number on user input
@@ -87,8 +87,23 @@ public class Console {
 	    return n;
 	}
 	//Search based on parameters
-	public static void search(String str) {
-		System.out.print("I see what you're tryin to do..");
+	public static void search(String str) {	
+		//Plural
+		if(str.contains("companies")||str.contains("stocks")) {
+			displayHeader(0);
+			for(int i = 0; i<Data.c-1;i++)
+			displayReport(i,0);
+		}
+		//Singular
+		else {
+			displayHeader(0);
+			//is looking for more than one company specifically?
+			for(int i = 0 ; i <Data.c-1;i++) {
+				if(str.contains(Data.columnA[i].toLowerCase()))
+					displayReport(i,0);
+			}
+				
+		}
 	}
 	public static void search(double n, String str, int keyword, boolean p, boolean s ) {
 		//Some cases may have execute the same function. The reason is because some cases are coming from Spanish language.
@@ -170,12 +185,12 @@ public class Console {
 	public static void filterInRelationTo52wkHigh(double n, boolean p, boolean s) {
 		//TO BE CODED
 		if(p) {//search for percent negative
-			if(s) {
+		
 				System.out.println("Search for percent negative in relation to 52wk high");
 				for(int i = 0; i<Data.c-1;i++)				
 					if( Data.columnD[i]>=(Data.columnG[i]-Data.columnG[i]*(n/100))) 
 						System.out.println(Data.columnA[i]);			
-			} else System.out.println("Wait, that makes no sense. Check your input and try again please.");			
+//			 else System.out.println("Wait, that makes no sense. Check your input and try again please.");			
 		}else//search for constant							
 			 for(int i= 0; i<Data.c;i++) 	
 					if(Data.columnD[i]-Data.columnG[i]< -n) 
@@ -190,14 +205,17 @@ public class Console {
 		sb.append(StringUtil.pad(Data.columnA[i], 20));
 		sb.append(StringUtil.pad(Data.columnB[i].toLowerCase(), 9));
 		sb.append(StringUtil.pad("$"+Data.columnD[i], 15));
-		switch(c) {
-		//Open price
+		switch(c) {	
 		case 2: sb.append(StringUtil.pad("$"+Data.columnC[i], 12)); break;
 		case 4: sb.append(StringUtil.pad("$"+Data.columnE[i], 15)); break;
 		case 5:	sb.append(StringUtil.pad("$"+Data.columnF[i], 15)); break;
 		case 6: sb.append(StringUtil.pad("$"+Data.columnG[i], 15)); break;
 		case 7: sb.append(StringUtil.pad("$"+Data.columnH[i], 15)); break;
-		default: System.out.println("Error printing display report");
+		default: 	sb.append(StringUtil.pad("$"+Data.columnC[i], 12));
+					sb.append(StringUtil.pad("$"+Data.columnE[i], 15));
+					sb.append(StringUtil.pad("$"+Data.columnF[i], 15));
+					sb.append(StringUtil.pad("$"+Data.columnG[i], 15));
+					sb.append(StringUtil.pad("$"+Data.columnH[i], 15));
 		}		
 		sb.append("\n");
 		System.out.print(sb);
@@ -215,7 +233,13 @@ public class Console {
 		case 5:	sb.append(StringUtil.pad("Today's low", 15)); break;
 		case 6: sb.append(StringUtil.pad("52-week high", 15)); break;
 		case 7: sb.append(StringUtil.pad("52-week low", 15)); break;
-		default : System.out.println("Error printing header");
+		default :
+			sb.append(StringUtil.pad("Open price ", 12));
+			sb.append(StringUtil.pad("Today's high ",15));
+			sb.append(StringUtil.pad("Today's low", 15));
+			sb.append(StringUtil.pad("52-week high", 15));
+			sb.append(StringUtil.pad("52-week low", 15));
+					
 		}		
 		sb.append("\n");
 		System.out.println(sb);
