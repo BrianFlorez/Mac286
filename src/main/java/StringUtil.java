@@ -1,4 +1,4 @@
-package mac286;
+
 public class StringUtil {
 	public static String pad(String s, int length) {
 		if(s.length()<length) {
