@@ -23,15 +23,12 @@ public class SuperWatchList{
     private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
     private static int size;
-
-
     /**
      * Creates an authorized Credential object.
      * @param HTTP_TRANSPORT The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
         InputStream in = SuperWatchList.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
@@ -65,15 +62,20 @@ public class SuperWatchList{
             //Lets retrieve and save the data
             int i =0;
             for (List row : values) {
-                Brain.columnA[i] = row.get(0).toString();
-                Brain.columnB[i] = row.get(1).toString();
-                Brain.columnC[i] = Double.parseDouble(row.get(2).toString());
-                Brain.columnD[i] = Double.parseDouble(row.get(3).toString());
-                Brain.columnE[i] = Double.parseDouble(row.get(4).toString());
-                Brain.columnF[i] = Double.parseDouble(row.get(5).toString());
-                Brain.columnG[i] = Double.parseDouble(row.get(6).toString());
-                Brain.columnH[i] = Double.parseDouble(row.get(7).toString());
-                i++;
+                try{
+                    Brain.columnA[i] = row.get(0).toString();
+                    Brain.columnB[i] = row.get(1).toString();
+                    Brain.columnC[i] = Double.parseDouble(row.get(2).toString());
+                    Brain.columnD[i] = Double.parseDouble(row.get(3).toString());
+                    Brain.columnE[i] = Double.parseDouble(row.get(4).toString());
+                    Brain.columnF[i] = Double.parseDouble(row.get(5).toString());
+                    Brain.columnG[i] = Double.parseDouble(row.get(6).toString());
+                    Brain.columnH[i] = Double.parseDouble(row.get(7).toString());
+                    i++;
+                } catch (Exception e){
+                    System.out.println("There is something wrong with the data, please check your google sheet.");
+                    System.out.println(row.get(0).toString() + " has invalid data");
+                };
             }
         }
 
@@ -87,11 +89,12 @@ public class SuperWatchList{
         //Read user input
         Scanner kb = new Scanner(System.in);
         String str 	= kb.nextLine();
-        //Search for keywords in user input
-        boolean isPercent = false;
-        //Positive limit by default
-        boolean isNegative = false;
-        do {//Fix or clean str variable before anything
+        do {
+            //Search for keywords in user input
+            boolean isPercent = false;
+            //Positive limit by default
+            boolean isNegative = false;
+            //Fix or clean str variable before anything
             str = str.toLowerCase();
             //Response friendly if the user is also being friendly =)
             if(Brain.isUserFriendly(str))
@@ -118,6 +121,12 @@ public class SuperWatchList{
         System.out.println("The program has been terminated.");
     }//./readInput();
     //Search for number on user input
+
+    /**
+     *
+     * @param str str represents a user string
+     * @return returns a double number from the user string
+     */
     public static double extractNumber(final String str) {
         if(str == null || str.isEmpty()) return 0; //Returns 0 when given str is empty.
         StringBuilder sb = new StringBuilder();
@@ -137,6 +146,7 @@ public class SuperWatchList{
     public static void search(String str) {
         //Plural
         if(str.contains("companies")||str.contains("stocks")) {
+
             displayHeader(0);
             for(int i = 0; i< Brain.size-1; i++)
                 displayReport(i,0);
@@ -154,90 +164,115 @@ public class SuperWatchList{
     }
     public static void search(double n, String str, int keyword, boolean p, boolean s ) {
         //Some cases may have execute the same function. The reason is because some cases are coming from Spanish language.
+        //keyword represents the index in Brain.java keywords[]
         switch(keyword) {
             //Open price
-            case 0: filterInRelationToOpenPrice(n,p,s); break;
-            case 8: filterInRelationToOpenPrice(n,p,s); break;
+            case 0:
+            case 8:
+                filterInRelationToOpenPrice(n,p,s); break;
             //Today's high
-            case 2:	filterInRelationToTodaysHigh(n,p,s); break;
-            case 10: filterInRelationToTodaysHigh(n,p,s); break;
+            case 2:
+            case 10:
+                filterInRelationToTodaysHigh(n,p,s); break;
             //Today's low
-            case 3: filterInRelationToTodaysLow(n,p,s); break;
-            case 11: filterInRelationToTodaysLow(n,p,s); break;
+            case 3:
+            case 11:
+                filterInRelationToTodaysLow(n,p); break;
             //52-Week high
-            case 4: filterInRelationTo52wkHigh(n,p,s); break;
-            case 5: filterInRelationTo52wkHigh(n,p,s); break;
-            case 12: filterInRelationTo52wkHigh(n,p,s); break;
-            case 13: filterInRelationTo52wkHigh(n,p,s); break;
+            case 4:
+            case 5:
+            case 13:
+            case 12:
+                filterInRelationTo52wkHigh(n,p); break;
             //52-Week low
-
+            case 6:
+            case 7:
+            case 14:
+            case 15:
+                filterInrelationTo52wkLow(n,p); break;
             default: System.out.println("Sorry, I couldn't get that.");
         }//./switch()
     }
-    //Functions to compare current price to any other column
-    public static void filterInRelationToOpenPrice(double n,boolean p,boolean s) {
+
+
+    /**
+     * Function to compare current price to open price
+     * @param number number is representing the value from user input
+     * @param isPercent is the user searching using percent?
+     * @param isNegative is the search a negative difference?
+     */
+    public static void filterInRelationToOpenPrice(double number,boolean isPercent,boolean isNegative) {
         displayHeader(2);
-        //n = number in comparison, p = isPercent, s = isNegative
-        if(p) {
+        //number = number in comparison, p = isPercent, isNegative = isNegative
+        if(isPercent) {
             //search for percent negative
-            if(s) {
+            if(isNegative) {
                 for(int i = 0; i< Brain.size; i++) {
-                    if( Brain.columnD[i]<(Brain.columnC[i]- Brain.columnC[i]*(n/100)))displayReport(i,2);
+                    if( Brain.columnD[i]<(Brain.columnC[i]- Brain.columnC[i]*(number/100)))displayReport(i,2);
                 }
             }else {
                 for(int i = 0; i< Brain.size; i++) {
-                    if( Brain.columnD[i]>(Brain.columnC[i]+ Brain.columnC[i]*(n/100)))displayReport(i,2);
+                    if( Brain.columnD[i]>(Brain.columnC[i]+ Brain.columnC[i]*(number/100)))
+                        displayReport(i,2);
                 }
             }
         }else {
-            if(s)n = n * -1;
+            if(isNegative)number = number * -1;
             //search for constant
             for(int i = 0; i< Brain.size; i++) {
-                if(Brain.columnD[i]- Brain.columnC[i]<n)displayReport(i,2);
+                if(Brain.columnD[i]- Brain.columnC[i]<number)displayReport(i,2);
             }
         }
     }
     public static void filterInRelationToTodaysHigh(double n, boolean p, boolean s) {
+        displayHeader(4);
         if(p){//search for percent negative
             if(s){for(int i = 0; i< Brain.size; i++){
                 if( Brain.columnD[i]<(Brain.columnE[i]- Brain.columnE[i]*(n/100))) {
-                    System.out.println(Brain.columnA[i]);}}}//./if(s)
+                    displayReport(i,4);
+                }}}//./if(s)
             else {System.out.println("That's imposible to answer. Check your input and try again, plaese \n");readInput();}}
         //Search for constant
         else {if(s){//search for constant
             for(int i = 0; i< Brain.size; i++) {
-                if(Brain.columnD[i]- Brain.columnE[i]<n) {
-                    System.out.println(Brain.columnA[i]);}}}
+                if((Brain.columnE[i]-Brain.columnD[i])>= n) {
+                    displayReport(i,4);}}
+        }
         else {System.out.println("That's imposible to answer. Check your input and try again, plaese \n");readInput();}}//./else
-
     }
-    public static void filterInRelationToTodaysLow(double n, boolean p, boolean s) {
+    public static void filterInRelationToTodaysLow(double n, boolean p) {
         //n = number in comparison, p = isPercent, s = isNegative
+        displayHeader(5);
         if(p) {//search for percent
             for(int i = 0; i< Brain.size-1; i++)
                 if(Brain.columnD[i]>=(Brain.columnF[i]+ Brain.columnF[i]*(n/100)))
-                    System.out.println(Brain.columnA[i]);
+                    displayReport(i,5);
         }else //search for constant
             for(int j = 0; j< Brain.size; j++)
-                if(Brain.columnD[j]- Brain.columnF[j]>=n)
-                    System.out.println(Brain.columnA[j]);
+                if((Brain.columnD[j]- Brain.columnF[j])>=n)
+                    displayReport(j,5);
     }
-    public static void filterInRelationTo52wkHigh(double n, boolean p, boolean s) {
-        //TO BE CODED
-        if(p) {//search for percent negative
-
-            System.out.println("Search for percent negative in relation to 52wk high");
+    public static void filterInRelationTo52wkHigh(double n, boolean isPercent) {
+        displayHeader(6);
+        if(isPercent) {
             for(int i = 0; i< Brain.size-1; i++)
-                if( Brain.columnD[i]>=(Brain.columnG[i]- Brain.columnG[i]*(n/100)))
-                    System.out.println(Brain.columnA[i]);
-//			 else System.out.println("Wait, that makes no sense. Check your input and try again please.");
+                if( Brain.columnD[i]<=(Brain.columnG[i]- Brain.columnG[i]*(n/100)))
+                    displayReport(i,6);
         }else//search for constant
             for(int i = 0; i< Brain.size; i++)
                 if(Brain.columnD[i]- Brain.columnG[i]< -n)
-                    System.out.println(Brain.columnA[i]);
+                   displayReport(i,6);
     }
-    public static void filterInrelationTo52wkLow(double n, boolean p, boolean s) {
-
+    public static void filterInrelationTo52wkLow(double number, boolean isPercent) {
+        displayHeader(7);
+        if(isPercent) {
+            for(int i = 0; i< Brain.size-1; i++)
+                if( Brain.columnD[i]>=(Brain.columnH[i] + Brain.columnH[i]*(number/100)))
+                    displayReport(i,7);
+        }else//search for constant
+            for(int i = 0; i< Brain.size; i++)
+                if(Brain.columnD[i]- Brain.columnH[i]> number)
+                   displayReport(i,7);
     }
     public static void displayReport(int i,int column) {
         //Details for given company at index [i]
@@ -259,8 +294,6 @@ public class SuperWatchList{
         }
         sb.append("\n");
         System.out.print(sb);
-
-
     }
     public static void displayHeader(int c) {
         StringBuilder sb = new StringBuilder();
@@ -284,28 +317,4 @@ public class SuperWatchList{
         sb.append("\n");
         System.out.print(sb);
     }
-    // Variables declaration - do not modify
-    private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
-    // End of variables declaration
 }
