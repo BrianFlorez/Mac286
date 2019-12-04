@@ -99,7 +99,7 @@ public class SuperWatchList{
             //Response friendly if the user is also being friendly =)
             if(Brain.isUserFriendly(str))
                 Brain.getFriendlyResponse();
-            if(str.contains("lose")||str.contains("loosing")||str.contains("perdida")||str.contains("perdiendo")||str.contains("perdido"))
+            if(str.contains("lose")||str.contains("losing")||str.contains("perdida")||str.contains("perdiendo")||str.contains("perdido"))
                 isNegative=true;
             //Search for keywords to find "relation to which column?"
             int i;
@@ -131,10 +131,14 @@ public class SuperWatchList{
         if(str == null || str.isEmpty()) return 0; //Returns 0 when given str is empty.
         StringBuilder sb = new StringBuilder();
         boolean found = false;
+        boolean firstDecimalSeparator = false;
         for(char c : str.toCharArray()){
-            if(Character.isDigit(c)){
+            if(Character.isDigit(c)) {
                 sb.append(c);
                 found = true;
+            } else if (found && c == '.' && !firstDecimalSeparator ) {
+                sb.append(c);
+                firstDecimalSeparator = true;
             } else if(found)
                 break; // If we already found a digit before and this char is not a digit, stop looping
         }
@@ -146,7 +150,6 @@ public class SuperWatchList{
     public static void search(String str) {
         //Plural
         if(str.contains("companies")||str.contains("stocks")) {
-
             displayHeader(0);
             for(int i = 0; i< Brain.size-1; i++)
                 displayReport(i,0);
@@ -212,15 +215,22 @@ public class SuperWatchList{
                 }
             }else {
                 for(int i = 0; i< Brain.size; i++) {
-                    if( Brain.columnD[i]>(Brain.columnC[i]+ Brain.columnC[i]*(number/100)))
+                    if( Brain.columnD[i] > (Brain.columnC[i] + Brain.columnC[i]*(number/100)))
                         displayReport(i,2);
                 }
             }
         }else {
-            if(isNegative)number = number * -1;
-            //search for constant
-            for(int i = 0; i< Brain.size; i++) {
-                if(Brain.columnD[i]- Brain.columnC[i]<number)displayReport(i,2);
+            if (isNegative) {
+                for (int i = 0; i < Brain.size; i++) {
+                    if (Brain.columnC[i] - Brain.columnD[i] > number)
+                        displayReport(i, 2);
+                }
+            } else {
+                //search for constant
+                for (int i = 0; i < Brain.size; i++) {
+                    if (Brain.columnD[i] - Brain.columnC[i] > number)
+                        displayReport(i, 2);
+                }
             }
         }
     }
